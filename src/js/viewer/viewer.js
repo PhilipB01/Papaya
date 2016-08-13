@@ -53,6 +53,7 @@ papaya.viewer.Viewer = papaya.viewer.Viewer || function (container, width, heigh
     this.isContextMode = false;
     this.isPanning = false;
     this.isMarkingMode = false;
+    this.pointStart = new papaya.core.Coordinate(0, 0, 0);
     this.markingCoords = [
         /*{
          startingIndex,
@@ -1889,9 +1890,12 @@ papaya.viewer.Viewer.prototype.mouseDownEvent = function (me) {
             this.findClickedSlice(this, this.previousMousePosition.x, this.previousMousePosition.y);
 
             if (this.isMarkingMode && me.button === 0 && this.selectedSlice === this.mainImage) {
-                var pointStart = convertScreenToImageCoordinate(this.previousMousePosition.x - this.canvasRect.left,
+                console.log("Marking mouse down event press!")
+                this.pointStart = this.convertScreenToImageCoordinate(this.previousMousePosition.x - this.canvasRect.left,
                     this.previousMousePosition.y - this.canvasRect.top, this.mainImage);
-                this.cursorPosition = pointStart;
+                console.log(this.previousMousePosition.x - this.canvasRect.left);
+                console.log(this.previousMousePosition.y - this.canvasRect.top);
+                console.log(this.pointStart);
             }
             else if (((me.button === 2) || this.isControlKeyDown || this.isLongTouch) && this.container.contextManager && (this.selectedSlice === this.mainImage) && (this.mainImage === this.surfaceView)) {
                 this.contextMenuMousePositionX = this.previousMousePosition.x - this.canvasRect.left;
@@ -1994,7 +1998,6 @@ papaya.viewer.Viewer.prototype.mouseUpEvent = function (me) {
     if (!papaya.Container.allowPropagation) {
         me.stopPropagation();
     }
-
     me.preventDefault();
 
     if (this.showingContextMenu) {
@@ -2005,18 +2008,23 @@ papaya.viewer.Viewer.prototype.mouseUpEvent = function (me) {
 
     if ((me.target.nodeName === "IMG") || (me.target.nodeName === "CANVAS")) {
         if (me.handled !== true) {
-            if (this.isMarkingMode) {
+            if (this.isMarkingMode && me.button === 0 && this.selectedSlice === this.mainImage) {
+                console.log("Marking mouse up event press!")
                 var currentMouseX = papaya.utilities.PlatformUtils.getMousePositionX(me);
                 var currentMouseY = papaya.utilities.PlatformUtils.getMousePositionY(me);
+                console.log(currentMouseX - this.canvasRect.left);
+                console.log(currentMouseY - this.canvasRect.top);
 
-                var pointEnd = convertScreenToImageCoordinate(currentMouseX - this.canvasRect.left,
+                var pointEnd = this.convertScreenToImageCoordinate(currentMouseX - this.canvasRect.left,
                     currentMouseY - this.canvasRect.top, this.mainImage);
 
-                var myMarker = new this.markerObject(this.cursorPosition, pointEnd, this.mainImage.currentSlice, this.mainImage.sliceDirection);
+                var myMarker = new this.markerObject(this.pointStart, pointEnd, this.mainImage.currentSlice, this.mainImage.sliceDirection);
+                console.log(myMarker);
 
                 this.markingCoords.push(myMarker);
+                this.drawMarkers();
             }
-            if (!this.isWindowControl && !this.isZoomMode && !this.isContextMode && (this.grabbedHandle === null) && (!this.surfaceView || (this.surfaceView.grabbedRulerPoint === -1))) {
+            else if (!this.isWindowControl && !this.isZoomMode && !this.isContextMode && (this.grabbedHandle === null) && (!this.surfaceView || (this.surfaceView.grabbedRulerPoint === -1))) {
                 this.updatePosition(this, papaya.utilities.PlatformUtils.getMousePositionX(me), papaya.utilities.PlatformUtils.getMousePositionY(me));
             }
 
@@ -2131,7 +2139,10 @@ papaya.viewer.Viewer.prototype.mouseMoveEvent = function (me) {
     currentMouseX = papaya.utilities.PlatformUtils.getMousePositionX(me);
     currentMouseY = papaya.utilities.PlatformUtils.getMousePositionY(me);
 
-    if (this.isDragging) {
+    if (this.inMarkingMode && me.button === 0 && this.selectedSlice === this.mainImage) {
+
+    }
+    else if (this.isDragging) {
         if (this.grabbedHandle) {
             if (this.isInsideMainSlice(currentMouseX, currentMouseY)) {
                 this.grabbedHandle.x = this.convertScreenToImageCoordinateX(currentMouseX - this.canvasRect.left, this.selectedSlice);
@@ -3410,19 +3421,22 @@ papaya.viewer.Viewer.prototype.markerObject = function(startingIndex, endingInde
 
 papaya.viewer.Viewer.prototype.drawMarkers = function() {
     for (var i = 0; i < this.markingCoords.length; i++) {
-        var start = this.convertCoordinateToScreen(markingCoords[i].start);
-        var end = this.convertCoordinateToScreen(markingCoords[i].end);
-        /*console.log(markingCoords[i].end);
-        console.log(start);*/
+        var marker = this.markingCoords[i];
+        if (this.mainImage.sliceDirection == marker.view && this.mainImage.currentSlice == marker.slice) {
+            var start = this.convertCoordinateToScreen(marker.start);
+            var end = this.convertCoordinateToScreen(marker.end);
+            /*console.log(marker.end);
+             console.log(start);*/
 
-        var ctx = this.canvas.getContext("2d");
-        //ctx.save();
-        ctx.beginPath();
-        ctx.lineWidth = "4";
-        ctx.strokeStyle = "red";
-        ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
-        ctx.stroke();
-        //ctx.restore();
+            var ctx = this.canvas.getContext("2d");
+            //ctx.save();
+            ctx.beginPath();
+            ctx.lineWidth = "4";
+            ctx.strokeStyle = "red";
+            ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
+            ctx.stroke();
+            //ctx.restore();
+        }
     }
 
     this.mainImage.repaint(this.mainImage.currentSlice, false, true);

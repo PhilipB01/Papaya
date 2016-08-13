@@ -1,8 +1,5 @@
-Change event handlers for adjusting brightness/contrast
+
+lib modification required:
 Add marking rectangle using canvas
 Add zoom functionality
 Allow view switch between sagittal axial coronal directly
-Synchronize image stacks remotely
-
-lib modification required:
-Reapply fixes for dicom image loading

@@ -1,5 +1,6 @@
 
 lib modification required:
-Add marking rectangle using canvas
+
+x Allow view switch between sagittal axial coronal directly
 Add zoom functionality
-Allow view switch between sagittal axial coronal directly
+Improve marking with labels

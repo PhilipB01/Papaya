@@ -1806,6 +1806,35 @@ papaya.viewer.Viewer.prototype.rotateViews = function () {
 
 
 
+papaya.viewer.Viewer.prototype.rotateViews = function (targetView) {
+    var temp;
+
+    if (this.container.contextManager && this.container.contextManager.clearContext) {
+        this.container.contextManager.clearContext();
+    }
+
+    if (targetView.toLowerCase() === "axial") {
+        this.mainImage = this.axialSlice;
+        this.lowerImageTop = this.sagittalSlice;
+        this.lowerImageBot = this.coronalSlice;
+    } else if (targetView.toLowerCase() === "coronal") {
+        this.mainImage = this.coronalSlice;
+        this.lowerImageTop = this.axialSlice;
+        this.lowerImageBot = this.sagittalSlice;
+    } else if (targetView.toLowerCase() === "sagittal") {
+        this.mainImage = this.sagittalSlice;
+        this.lowerImageTop = this.coronalSlice;
+        this.lowerImageBot = this.axialSlice;
+    }
+    if (this.hasSurface()) {
+        this.lowerImageBot2 = this.surfaceView;
+    }
+
+    this.viewsChanged();
+};
+
+
+
 papaya.viewer.Viewer.prototype.viewsChanged = function () {
     this.calculateScreenSliceTransforms();
 
@@ -2012,14 +2041,11 @@ papaya.viewer.Viewer.prototype.mouseUpEvent = function (me) {
                 console.log("Marking mouse up event press!")
                 var currentMouseX = papaya.utilities.PlatformUtils.getMousePositionX(me);
                 var currentMouseY = papaya.utilities.PlatformUtils.getMousePositionY(me);
-                console.log(currentMouseX - this.canvasRect.left);
-                console.log(currentMouseY - this.canvasRect.top);
 
                 var pointEnd = this.convertScreenToImageCoordinate(currentMouseX - this.canvasRect.left,
                     currentMouseY - this.canvasRect.top, this.mainImage);
 
                 var myMarker = new this.markerObject(this.pointStart, pointEnd, this.mainImage.currentSlice, this.mainImage.sliceDirection);
-                console.log(myMarker);
 
                 this.markingCoords.push(myMarker);
                 this.drawMarkers();
@@ -3412,12 +3438,16 @@ papaya.viewer.Viewer.prototype.addParametric = function (imageIndex) {
     }
 };
 
+
+
 papaya.viewer.Viewer.prototype.markerObject = function(startingIndex, endingIndex, slice, view) {
     this.start = startingIndex;
     this.end = endingIndex;
     this.slice = slice;
     this.view = view;
 }
+
+
 
 papaya.viewer.Viewer.prototype.drawMarkers = function() {
     for (var i = 0; i < this.markingCoords.length; i++) {
@@ -3440,9 +3470,11 @@ papaya.viewer.Viewer.prototype.drawMarkers = function() {
     }
 
     this.mainImage.repaint(this.mainImage.currentSlice, false, true);
-    this.lowerImageBot.repaint(this.lowerImageBot.currentSlice, false, true);
-    this.lowerImageTop.repaint(this.lowerImageTop.currentSlice, false, true);
+    //this.lowerImageBot.repaint(this.lowerImageBot.currentSlice, false, true);
+    //this.lowerImageTop.repaint(this.lowerImageTop.currentSlice, false, true);
 }
+
+
 
 papaya.viewer.Viewer.prototype.clearMarkers = function() {
     this.markingCoords = [];

@@ -1806,8 +1806,7 @@ papaya.viewer.Viewer.prototype.rotateViews = function () {
 
 
 
-papaya.viewer.Viewer.prototype.rotateViews = function (targetView) {
-    var temp;
+papaya.viewer.Viewer.prototype.rotateToView = function (targetView) {
 
     if (this.container.contextManager && this.container.contextManager.clearContext) {
         this.container.contextManager.clearContext();

@@ -54,14 +54,7 @@ papaya.viewer.Viewer = papaya.viewer.Viewer || function (container, width, heigh
     this.isPanning = false;
     this.isMarkingMode = false;
     this.pointStart = new papaya.core.Coordinate(0, 0, 0);
-    this.markingCoords = [
-        /*{
-         startingIndex,
-         endingIndex,
-         slice,
-         view
-         }*/
-    ];
+    this.markingCoords = [];
     this.didLongTouch = false;
     this.isLongTouch = false;
     this.zoomFactor = papaya.viewer.Viewer.ZOOM_FACTOR_MIN;
@@ -1917,13 +1910,13 @@ papaya.viewer.Viewer.prototype.mouseDownEvent = function (me) {
 
             this.findClickedSlice(this, this.previousMousePosition.x, this.previousMousePosition.y);
 
-            if (this.isMarkingMode && me.button === 0 && this.selectedSlice === this.mainImage) {
+            if (this.isMarkingMode && this.selectedSlice === this.mainImage) {
                 console.log("Marking mouse down event press!")
                 this.pointStart = this.convertScreenToImageCoordinate(this.previousMousePosition.x - this.canvasRect.left,
                     this.previousMousePosition.y - this.canvasRect.top, this.mainImage);
-                console.log(this.previousMousePosition.x - this.canvasRect.left);
-                console.log(this.previousMousePosition.y - this.canvasRect.top);
-                console.log(this.pointStart);
+                //console.log(this.previousMousePosition.x - this.canvasRect.left);
+                //console.log(this.previousMousePosition.y - this.canvasRect.top);
+                //console.log(this.pointStart);
             }
             else if (((me.button === 2) || this.isControlKeyDown || this.isLongTouch) && this.container.contextManager && (this.selectedSlice === this.mainImage) && (this.mainImage === this.surfaceView)) {
                 this.contextMenuMousePositionX = this.previousMousePosition.x - this.canvasRect.left;
@@ -2036,7 +2029,7 @@ papaya.viewer.Viewer.prototype.mouseUpEvent = function (me) {
 
     if ((me.target.nodeName === "IMG") || (me.target.nodeName === "CANVAS")) {
         if (me.handled !== true) {
-            if (this.isMarkingMode && me.button === 0 && this.selectedSlice === this.mainImage) {
+            if (this.isMarkingMode && this.selectedSlice === this.mainImage) {
                 console.log("Marking mouse up event press!")
                 var currentMouseX = papaya.utilities.PlatformUtils.getMousePositionX(me);
                 var currentMouseY = papaya.utilities.PlatformUtils.getMousePositionY(me);

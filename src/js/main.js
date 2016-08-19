@@ -282,6 +282,7 @@ papaya.Container.fillContainerHTML = function (containerHTML, isDefault, params,
 
         containerHTML.append("<div id='" + (PAPAYA_DEFAULT_VIEWER_ID + index) +
             "' class='" + PAPAYA_VIEWER_CSS + "'></div>");
+
         if (!params || (params.zoom === undefined) || !params.zoom) {
             containerHTML.append("<div id='" + (PAPAYA_DEFAULT_DISPLAY_ID + index) +
                 "' class='" + PAPAYA_DISPLAY_CSS + "'></div>");
@@ -374,15 +375,15 @@ papaya.Container.buildContainer = function (containerHTML, params, replaceIndex)
         }
 
         container.buildViewer(container.params);
-        if (!this.zoomCSS) {
+        //if (!this.zoomCSS) {
             container.buildDisplay();
             container.buildToolbar();
             container.setUpDnD();
 
 
-        } else {
-            papaya.Container.setToFullPage();
-        }
+        //} else {
+            //papaya.Container.setToFullPage();
+        //}
 
         if (container.showControlBar) {
             container.buildSliderControl();
@@ -477,7 +478,6 @@ papaya.Container.buildAllContainers = function () {
             if (params.zoom === true) {
                 params.fullScreen = true;
                 params.showControls = false;
-                this.zoomCSS = true;
             }
 
             if (params.fullScreen === true) {
@@ -486,8 +486,6 @@ papaya.Container.buildAllContainers = function () {
                 params.showControlBar = false;
                 $('body').css({"background-color":"black"});
             }
-
-
 
             papaya.Container.fillContainerHTML($(this), false, params);
             papaya.Container.buildContainer($(this), params);
@@ -499,9 +497,9 @@ papaya.Container.buildAllContainers = function () {
         $("body").addClass(PAPAYA_CONTAINER_FULLSCREEN);
         papaya.Container.setToFullPage();
         if (params.zoom) {
-            document.body.style.overflow = 'visible';
-            document.body.style.width = "5760px";
-            document.body.style.height = "3840px";
+            document.body.style.overflow = 'hidden';
+            document.body.style.width = params.zoomCanvasDim[0] + "px";
+            document.body.style.height = params.zoomCanvasDim[1] + "px";
         }
 
         papayaContainers[0].resizeViewerComponents(true);
@@ -817,6 +815,9 @@ papaya.Container.prototype.readGlobalParams = function() {
         this.fullScreenPadding = this.params.fullScreenPadding = false;
         this.kioskMode = this.params.kioskMode = true;
         this.showControlBar = this.params.showControlBar = false;
+        if (this.params.zoomCanvasDim === undefined) {
+            this.params.zoomCanvasDim = [1920, 1080];
+        }
     }
 };
 

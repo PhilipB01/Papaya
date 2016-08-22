@@ -2066,16 +2066,16 @@ papaya.viewer.Viewer.prototype.mouseUpEvent = function (me) {
                             "OK": viewer.addLabel
                         },
                         close: function() {
-                            console.log(form[0]);
+                            //console.log(form[0]);
                             form[ 0 ].reset();
                         }
                     });
 
-                    /*form = this.labelDialog.find( "form" ).on( "submit", function( event ) {
-                        console.log("form submit");
+                    form = this.labelDialog.find( "form" ).on( "submit", function( event ) {
                         event.preventDefault();
-                        viewer.addLabel();
-                    });*/
+                        //console.log("form submit");
+                        //viewer.addLabel();
+                    });
 
                     this.labelDialog.data('viewer', viewer).dialog("open");
                 } else {

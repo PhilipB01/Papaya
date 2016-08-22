@@ -2,7 +2,7 @@
 /*jslint browser: true, node: true */
 /*global $, PAPAYA_SPACING, papayaContainers, papayaFloorFast, papayaRoundFast, PAPAYA_CONTROL_DIRECTION_SLIDER,
  PAPAYA_CONTROL_MAIN_SLIDER, PAPAYA_CONTROL_SWAP_BUTTON_CSS, PAPAYA_CONTROL_GOTO_ORIGIN_BUTTON_CSS,
- PAPAYA_CONTROL_GOTO_CENTER_BUTTON_CSS,  PAPAYA_CONTROL_MAIN_INCREMENT_BUTTON_CSS, PAPAYA_PADDING,
+ PAPAYA_CONTROL_GOTO_CENTER_BUTTON_CSS,  PAPAYA_CONTROL_MAIN_INCREMENT_BUTTON_CSS, PAPAYA_PADDING, PAPAYA_MARKER_LABEL_ID, PAPAYA_LABEL_DIALOG_CSS,
  PAPAYA_CONTROL_MAIN_DECREMENT_BUTTON_CSS, PAPAYA_CONTROL_MAIN_SWAP_BUTTON_CSS, PAPAYA_CONTROL_INCREMENT_BUTTON_CSS,
  PAPAYA_CONTROL_MAIN_GOTO_CENTER_BUTTON_CSS, PAPAYA_CONTROL_MAIN_GOTO_ORIGIN_BUTTON_CSS */
 
@@ -101,6 +101,7 @@ papaya.viewer.Viewer = papaya.viewer.Viewer || function (container, width, heigh
     this.drawEmptyViewer();
 
     this.processParams(params);
+
 };
 
 
@@ -2037,11 +2038,30 @@ papaya.viewer.Viewer.prototype.mouseUpEvent = function (me) {
                 var pointEnd = this.convertScreenToImageCoordinate(currentMouseX - this.canvasRect.left,
                     currentMouseY - this.canvasRect.top, this.mainImage);
 
-                var myMarker = new this.markerObject(this.pointStart, pointEnd, this.mainImage.currentSlice, this.mainImage.sliceDirection);
+                var textLabel = "";
+                var myMarker = new this.markerObject(this.pointStart, pointEnd, this.mainImage.currentSlice, this.mainImage.sliceDirection, textLabel);
 
                 this.markingCoords.push(myMarker);
+
                 this.drawMarkers();
+
+                var labelDialog = $("#" + PAPAYA_MARKER_LABEL_ID);
+                var annotationInput = $("#labelInput");
+                if (labelDialog != undefined && labelDialog != null) {
+                    labelDialog.dialog("open");
+                } else {
+                    textLabel = prompt("Add text annotation to marker");
+
+                    if (textLabel === undefined || textLabel === null) {
+                        textLabel = "";
+                    }
+                    myMarker.textLabel = textLabel;
+
+                    this.drawMarkers();
+                }
             }
+
+
             else if (!this.isWindowControl && !this.isZoomMode && !this.isContextMode && (this.grabbedHandle === null) && (!this.surfaceView || (this.surfaceView.grabbedRulerPoint === -1))) {
                 this.updatePosition(this, papaya.utilities.PlatformUtils.getMousePositionX(me), papaya.utilities.PlatformUtils.getMousePositionY(me));
             }
@@ -3432,11 +3452,12 @@ papaya.viewer.Viewer.prototype.addParametric = function (imageIndex) {
 
 
 
-papaya.viewer.Viewer.prototype.markerObject = function(startingIndex, endingIndex, slice, view) {
+papaya.viewer.Viewer.prototype.markerObject = function(startingIndex, endingIndex, slice, view, text) {
     this.start = startingIndex;
     this.end = endingIndex;
     this.slice = slice;
     this.view = view;
+    this.textLabel = text;
 }
 
 
@@ -3453,11 +3474,16 @@ papaya.viewer.Viewer.prototype.drawMarkers = function() {
             var ctx = this.canvas.getContext("2d");
             //ctx.save();
             ctx.beginPath();
-            ctx.lineWidth = "4";
+            ctx.lineWidth = "3";
             ctx.strokeStyle = "red";
             ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
             ctx.stroke();
             //ctx.restore();
+
+            if (marker.textLabel.length > 0) {
+                ctx.font = "20px Georgia";
+                ctx.fillText(marker.textLabel, end.x + 20, end.y + 10);
+            }
         }
     }
 

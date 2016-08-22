@@ -76,7 +76,7 @@ var PAPAYA_CONTROL_INCREMENT_BUTTON_CSS = "papaya-control-increment",
     PAPAYA_CONTROL_MAIN_GOTO_CENTER_BUTTON_CSS = "papaya-main-goto-center",
     PAPAYA_CONTROL_MAIN_GOTO_ORIGIN_BUTTON_CSS = "papaya-main-goto-origin",
     PAPAYA_CONTROL_BAR_LABELS_CSS = "papaya-controlbar-label";
-
+    PAPAYA_LABEL_DIALOG_CSS = "papaya-label-dialog";
 
 
 // Utils CSS classes
@@ -91,6 +91,7 @@ var PAPAYA_DEFAULT_VIEWER_ID  = "papayaViewer",
     PAPAYA_DEFAULT_TOOLBAR_ID = "papayaToolbar",
     PAPAYA_DEFAULT_CONTAINER_ID = "papayaContainer",
     PAPAYA_DEFAULT_SLIDER_ID = "papayaSliceSlider";
+    PAPAYA_MARKER_LABEL_ID = "dialog-form"
 
 
 // Misc constants

@@ -55,6 +55,7 @@ papaya.viewer.Viewer = papaya.viewer.Viewer || function (container, width, heigh
     this.isMarkingMode = false;
     this.pointStart = new papaya.core.Coordinate(0, 0, 0);
     this.markingCoords = [];
+    this.labelDialog = null;
     this.didLongTouch = false;
     this.isLongTouch = false;
     this.zoomFactor = papaya.viewer.Viewer.ZOOM_FACTOR_MIN;
@@ -2045,10 +2046,38 @@ papaya.viewer.Viewer.prototype.mouseUpEvent = function (me) {
 
                 this.drawMarkers();
 
-                var labelDialog = $("#" + PAPAYA_MARKER_LABEL_ID);
-                var annotationInput = $("#labelInput");
-                if (labelDialog != undefined && labelDialog != null) {
-                    labelDialog.dialog("open");
+                this.labelDialog = $("#" + PAPAYA_MARKER_LABEL_ID);
+
+                if (this.labelDialog != undefined && this.labelDialog != null) {
+
+                    /*var goToCoord = function(coord) {
+                        console.log(coord);
+                        papayaContainers[0].viewer.gotoCoordinate(coord);
+                    }*/
+
+                    var viewer = this;
+                    var form;
+                    this.labelDialog = $( "#" + PAPAYA_MARKER_LABEL_ID ).dialog({
+                        autoOpen: false,
+                        height: 200,
+                        width: 350,
+                        modal: true,
+                        buttons: {
+                            "OK": viewer.addLabel
+                        },
+                        close: function() {
+                            console.log(form[0]);
+                            form[ 0 ].reset();
+                        }
+                    });
+
+                    /*form = this.labelDialog.find( "form" ).on( "submit", function( event ) {
+                        console.log("form submit");
+                        event.preventDefault();
+                        viewer.addLabel();
+                    });*/
+
+                    this.labelDialog.data('viewer', viewer).dialog("open");
                 } else {
                     textLabel = prompt("Add text annotation to marker");
 
@@ -2105,6 +2134,35 @@ papaya.viewer.Viewer.prototype.mouseUpEvent = function (me) {
         this.controlsHidden = false;
         this.fadeInControls();
     }
+};
+
+papaya.viewer.Viewer.prototype.addLabel = function() {
+    var viewer = $("#dialog-form").data('viewer');
+    var label = $( "#labelInput" );
+    console.log(viewer.currentCoord);
+    var coord = new papaya.core.Coordinate();
+    coord.x = viewer.currentCoord.x;
+    coord.y = viewer.currentCoord.y;
+    coord.z = viewer.currentCoord.z;
+
+    var orientation = viewer.mainImage.sliceDirection;
+    var slice = viewer.mainImage.currentSlice;
+
+    $( "#markerTable tbody" ).append( "<tr>" +
+        "<td class='markerHotlink'>" + coord + "</td>" +
+        "<td>" + orientation + "</td>" +
+        "<td>" + slice + "</td>" +
+        "<td>" + label.val() + "</td>" +
+        "</tr>" );
+
+    $(".markerHotlink").last().click(function() {
+        viewer.gotoCoordinate(coord);
+    });
+
+    viewer.markingCoords[viewer.markingCoords.length - 1].textLabel = label.val();
+    viewer.drawMarkers();
+
+    viewer.labelDialog.dialog( "close" );
 };
 
 

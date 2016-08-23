@@ -2141,9 +2141,9 @@ papaya.viewer.Viewer.prototype.addLabel = function() {
 
     $( "#markerTable tbody" ).append( "<tr>" +
         "<td class='markerHotlink'>" + coord + "</td>" +
+        "<td>" + label.val() + "</td>" +
         "<td>" + orientation + "</td>" +
         "<td>" + slice + "</td>" +
-        "<td>" + label.val() + "</td>" +
         "</tr>" );
 
     $(".markerHotlink").last().click(function() {
@@ -3531,7 +3531,14 @@ papaya.viewer.Viewer.prototype.drawMarkers = function() {
 
             if (marker.textLabel.length > 0) {
                 ctx.font = "20px Georgia";
-                ctx.fillText(marker.textLabel, end.x + 20, end.y + 10);
+                ctx.fillStyle = "red";
+
+                if (this.canvas.width > 1200) {
+                    ctx.font = "28px Georgia";
+                    ctx.fillText(marker.textLabel, end.x + 20, end.y + 12);
+                } else {
+                    ctx.fillText(marker.textLabel, end.x + 12, end.y + 8);
+                }
             }
         }
     }

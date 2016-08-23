@@ -33,7 +33,7 @@ fieldset {
 }
 
 div #markers-contain {
-    width: 400px;
+    width: 450px;
     margin: 20px 30px;
     float: right;
 }
@@ -53,4 +53,5 @@ div #markers-contain table td, div#markers-contain table th {
 .markerHotlink {
     color: red;
     text-decoration: underline;
+    cursor: pointer;
 }

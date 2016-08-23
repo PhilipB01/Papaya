@@ -1916,9 +1916,6 @@ papaya.viewer.Viewer.prototype.mouseDownEvent = function (me) {
                 console.log("Marking mouse down event press!")
                 this.pointStart = this.convertScreenToImageCoordinate(this.previousMousePosition.x - this.canvasRect.left,
                     this.previousMousePosition.y - this.canvasRect.top, this.mainImage);
-                //console.log(this.previousMousePosition.x - this.canvasRect.left);
-                //console.log(this.previousMousePosition.y - this.canvasRect.top);
-                //console.log(this.pointStart);
             }
             else if (((me.button === 2) || this.isControlKeyDown || this.isLongTouch) && this.container.contextManager && (this.selectedSlice === this.mainImage) && (this.mainImage === this.surfaceView)) {
                 this.contextMenuMousePositionX = this.previousMousePosition.x - this.canvasRect.left;
@@ -2050,13 +2047,7 @@ papaya.viewer.Viewer.prototype.mouseUpEvent = function (me) {
 
                 if (this.labelDialog != undefined && this.labelDialog != null) {
 
-                    /*var goToCoord = function(coord) {
-                        console.log(coord);
-                        papayaContainers[0].viewer.gotoCoordinate(coord);
-                    }*/
-
-                    var viewer = this;
-                    var form;
+                    var form, viewer = this;
                     this.labelDialog = $( "#" + PAPAYA_MARKER_LABEL_ID ).dialog({
                         autoOpen: false,
                         height: 200,
@@ -2235,7 +2226,7 @@ papaya.viewer.Viewer.prototype.mouseMoveEvent = function (me) {
     currentMouseX = papaya.utilities.PlatformUtils.getMousePositionX(me);
     currentMouseY = papaya.utilities.PlatformUtils.getMousePositionY(me);
 
-    if (this.inMarkingMode && me.button === 0 && this.selectedSlice === this.mainImage) {
+    if (this.isMarkingMode && this.selectedSlice === this.mainImage) {
 
     }
     else if (this.isDragging) {
@@ -3555,4 +3546,6 @@ papaya.viewer.Viewer.prototype.drawMarkers = function() {
 papaya.viewer.Viewer.prototype.clearMarkers = function() {
     this.markingCoords = [];
     this.drawViewer(true);
+
+    $("#markerTable tbody").empty();
 }

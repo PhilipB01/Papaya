@@ -487,7 +487,7 @@ papaya.Container.buildAllContainers = function () {
                 params.fullScreenPadding = false;
                 params.kioskMode = true;
                 params.showControlBar = false;
-                $('body').css({"background-color":"black"});
+                //$('body').css({"background-color":"black"});
             }
 
             papaya.Container.fillContainerHTML($(this), false, params);

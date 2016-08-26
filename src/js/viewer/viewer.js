@@ -3536,6 +3536,9 @@ papaya.viewer.Viewer.prototype.drawMarkers = function() {
                 if (this.canvas.width > 1200) {
                     ctx.font = "28px Georgia";
                     ctx.fillText(marker.textLabel, end.x + 20, end.y + 12);
+                } else if (this.canvas.width > 2500) {
+                    ctx.font = "48px Georgia";
+                    ctx.fillText(marker.textLabel, end.x + 25, end.y + 16);
                 } else {
                     ctx.fillText(marker.textLabel, end.x + 12, end.y + 8);
                 }

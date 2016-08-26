@@ -1,7 +1,8 @@
 
 lib modification required:
 
+x Improve marking with labels
 x Allow view switch between sagittal axial coronal directly
-strip css
-Add zoom functionality
-Improve marking with labels
+x strip unneeded css
+x Add zoom functionality
+

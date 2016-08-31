@@ -2226,11 +2226,11 @@ papaya.viewer.Viewer.prototype.mouseMoveEvent = function (me) {
     currentMouseX = papaya.utilities.PlatformUtils.getMousePositionX(me);
     currentMouseY = papaya.utilities.PlatformUtils.getMousePositionY(me);
 
-    if (this.isMarkingMode && this.selectedSlice === this.mainImage) {
-
-    }
-    else if (this.isDragging) {
-        if (this.grabbedHandle) {
+    if (this.isDragging) {
+        if (this.isMarkingMode && this.selectedSlice === this.mainImage) {
+            console.log("Move event in marking mode - does nothing");
+        }
+        else if (this.grabbedHandle) {
             if (this.isInsideMainSlice(currentMouseX, currentMouseY)) {
                 this.grabbedHandle.x = this.convertScreenToImageCoordinateX(currentMouseX - this.canvasRect.left, this.selectedSlice);
                 this.grabbedHandle.y = this.convertScreenToImageCoordinateY(currentMouseY - this.canvasRect.top, this.selectedSlice);

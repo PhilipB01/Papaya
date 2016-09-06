@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <link rel="stylesheet" type="text/css" href="../release/current/standard/papaya.css" />
+    <script type="text/javascript" src="../release/current/standard/papaya.js"></script>
+
+    <style>
+        body {
+            width:1000px;
+            margin:0 auto;
+            background:white;
+        }
+
+        .smallViewer {
+            margin:20px;width:700px;height:615px;
+        }
+
+        .left {
+            float: left;
+        }
+
+        .right {
+            float: right;
+        }
+    </style>
+
+    <script type="text/javascript">
+        var params1 = [];
+        params1["worldSpace"] = true;
+        params1["images"] = ["data/patient.nii.gz"];
+        params1["kioskMode"] = true;
+        params1["showControlBar"] = true;
+
+        var params2 = [];
+        params2["worldSpace"] = true;
+        params2["images"] = ["data/sample_image.nii.gz"];
+        params2["expandable"] = true;
+    </script>
+
+
+    <title>Papaya</title>
+</head>
+
+<body>
+
+<div class="smallViewer left">
+    <div class="papaya" data-params="params1"></div>
+</div>
+
+<div style="clear:both"></div>
+
+<div class="smallViewer right">
+    <div class="papaya" data-params="params2"></div>
+</div>
+
+<div class="buttonsDiv">
+    <input id="changeContrastButton" type="button" value="Change contrast levels"/>
+    <input id="changeColorButton" type="button" value="Change color table to Fire"/>
+</div>
+
+<script>
+    $("#changeContrastButton").click(function() {
+        var volume = papayaContainers[0].viewer.screenVolumes[0];
+
+        var screenMin = 0;
+        var screenMax = 500;
+        console.log(volume);
+
+        papayaContainers[0].preferences.showCrosshairs = "No";
+
+        volume.setScreenRange(screenMin, screenMax);
+        console.log(papayaContainers[0]);
+        papayaContainers[0].viewer.drawViewer(true);
+    });
+
+
+    $("#changeColorButton").click(function() {
+        var volume = papayaContainers[0].viewer.screenVolumes[0];
+        volume.changeColorTable(papayaContainers[0].viewer, "Gold");
+
+
+        var volume = papayaContainers[1].viewer.screenVolumes[0];
+        volume.lutName = "Fire";
+        var colorTable = new papaya.viewer.ColorTable(volume.lutName, true);
+        volume.colorTable = colorTable;
+        papayaContainers[1].viewer.drawViewer(true);
+    });
+</script>
+
+
+
+</body>
+
+</html>

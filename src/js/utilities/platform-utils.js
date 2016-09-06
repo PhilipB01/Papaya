@@ -100,12 +100,11 @@ papaya.utilities.PlatformUtils.isWebGLSupported = function () {
 
 papaya.utilities.PlatformUtils.getMousePositionX = function (ev) {
     var touch;
-
     if (ev.originalEvent) {
         ev = ev.originalEvent;
-    }
+    }length
 
-    if (ev.targetTouches) {
+    if (ev.targetTouches && ev.targetTouches.length > 0) {
         if (ev.targetTouches.length === 1) {
             touch = ev.targetTouches[0];
             if (touch) {
@@ -129,7 +128,7 @@ papaya.utilities.PlatformUtils.getMousePositionX = function (ev) {
 papaya.utilities.PlatformUtils.getMousePositionY = function (ev) {
     var touch;
 
-    if (ev.targetTouches) {
+    if (ev.targetTouches && ev.targetTouches.length > 0) {
         if (ev.targetTouches.length === 1) {
             touch = ev.targetTouches[0];
             if (touch) {

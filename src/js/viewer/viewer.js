@@ -633,6 +633,7 @@ papaya.viewer.Viewer.prototype.initializeViewer = function () {
             papayaFloorFast(this.volume.getZDim() / 2));
 
         this.updateOffsetRect();
+        this.updateOffsetRect();
 
         this.bgColor = $("body").css("background-color");
 
@@ -1912,10 +1913,14 @@ papaya.viewer.Viewer.prototype.mouseDownEvent = function (me) {
 
             this.findClickedSlice(this, this.previousMousePosition.x, this.previousMousePosition.y);
 
-            if (this.isMarkingMode && this.selectedSlice === this.mainImage) {
+            if (this.isMarkingMode && me.button !== 2) {
                 console.log("Marking mouse down event press!")
+                console.log(this.previousMousePosition.x + ", " + this.previousMousePosition.y);
+
                 this.pointStart = this.convertScreenToImageCoordinate(this.previousMousePosition.x - this.canvasRect.left,
-                    this.previousMousePosition.y - this.canvasRect.top, this.mainImage);
+                    this.previousMousePosition.y - this.canvasRect.top, this.selectedSlice);
+
+                console.log(this.pointStart);
             }
             else if (((me.button === 2) || this.isControlKeyDown || this.isLongTouch) && this.container.contextManager && (this.selectedSlice === this.mainImage) && (this.mainImage === this.surfaceView)) {
                 this.contextMenuMousePositionX = this.previousMousePosition.x - this.canvasRect.left;
@@ -2028,24 +2033,28 @@ papaya.viewer.Viewer.prototype.mouseUpEvent = function (me) {
 
     if ((me.target.nodeName === "IMG") || (me.target.nodeName === "CANVAS")) {
         if (me.handled !== true) {
-            if (this.isMarkingMode && this.selectedSlice === this.mainImage) {
+            if (this.isMarkingMode && me.button !== 2) {
                 console.log("Marking mouse up event press!")
                 var currentMouseX = papaya.utilities.PlatformUtils.getMousePositionX(me);
                 var currentMouseY = papaya.utilities.PlatformUtils.getMousePositionY(me);
 
-                var pointEnd = this.convertScreenToImageCoordinate(currentMouseX - this.canvasRect.left,
-                    currentMouseY - this.canvasRect.top, this.mainImage);
+                this.pointEnd = this.convertScreenToImageCoordinate(currentMouseX - this.canvasRect.left,
+                    currentMouseY - this.canvasRect.top, this.selectedSlice);
 
                 var textLabel = "";
-                var myMarker = new this.markerObject(this.pointStart, pointEnd, this.mainImage.currentSlice, this.mainImage.sliceDirection, textLabel);
+                var myMarker = new this.markerObject(this.pointStart, this.pointEnd, this.mainImage.currentSlice, this.mainImage.sliceDirection, textLabel);
 
                 this.markingCoords.push(myMarker);
 
+                this.currentCoord.x = (this.pointEnd.x + this.pointStart.x) / 2;
+                this.currentCoord.y = (this.pointEnd.y + this.pointStart.y) / 2;
+                this.currentCoord.z = (this.pointEnd.z + this.pointStart.z) / 2;
+                this.drawViewer(false);
                 this.drawMarkers();
 
                 this.labelDialog = $("#" + PAPAYA_MARKER_LABEL_ID);
 
-                if (this.labelDialog != undefined && this.labelDialog != null) {
+                if (this.labelDialog[0] != undefined && this.labelDialog[0] != null) {
 
                     var form, viewer = this;
                     this.labelDialog = $( "#" + PAPAYA_MARKER_LABEL_ID ).dialog({
@@ -2072,7 +2081,7 @@ papaya.viewer.Viewer.prototype.mouseUpEvent = function (me) {
                 } else {
                     textLabel = prompt("Add text annotation to marker");
 
-                    if (textLabel === undefined || textLabel === null) {
+                    if (textLabel === undefined) {
                         textLabel = "";
                     }
                     myMarker.textLabel = textLabel;
@@ -2130,11 +2139,10 @@ papaya.viewer.Viewer.prototype.mouseUpEvent = function (me) {
 papaya.viewer.Viewer.prototype.addLabel = function() {
     var viewer = $("#dialog-form").data('viewer');
     var label = $( "#labelInput" );
-    console.log(viewer.currentCoord);
     var coord = new papaya.core.Coordinate();
-    coord.x = viewer.currentCoord.x;
-    coord.y = viewer.currentCoord.y;
-    coord.z = viewer.currentCoord.z;
+    coord.x = (viewer.pointStart.x + viewer.pointEnd.x ) / 2;
+    coord.y = (viewer.pointStart.y + viewer.pointEnd.y ) / 2;
+    coord.z = (viewer.pointStart.z + viewer.pointEnd.z ) / 2;
 
     var orientation = viewer.mainImage.sliceDirection;
     var slice = viewer.mainImage.currentSlice;
@@ -2227,8 +2235,8 @@ papaya.viewer.Viewer.prototype.mouseMoveEvent = function (me) {
     currentMouseY = papaya.utilities.PlatformUtils.getMousePositionY(me);
 
     if (this.isDragging) {
-        if (this.isMarkingMode && this.selectedSlice === this.mainImage) {
-            console.log("Move event in marking mode - does nothing");
+        if (this.isMarkingMode && me.button !== 2) {
+            //console.log("Move event in marking mode - does nothing");
         }
         else if (this.grabbedHandle) {
             if (this.isInsideMainSlice(currentMouseX, currentMouseY)) {
@@ -2358,6 +2366,8 @@ papaya.viewer.Viewer.prototype.touchMoveEvent = function (me) {
             this.longTouchTimer = null;
         }
 
+        console.log("touchMoveEvent");
+
         if (!this.isDragging) {
             this.mouseDownEvent(me);
             this.isDragging = true;
@@ -2374,6 +2384,8 @@ papaya.viewer.Viewer.prototype.touchStartEvent = function (me) {
         me.stopPropagation();
     }
 
+    console.log("touchStartEvent");
+
     me.preventDefault();
     this.longTouchTimer = setTimeout(papaya.utilities.ObjectUtils.bind(this, function() {this.doLongTouch(me); }), 500);
 };
@@ -2386,6 +2398,8 @@ papaya.viewer.Viewer.prototype.touchEndEvent = function (me) {
             clearTimeout(this.longTouchTimer);
             this.longTouchTimer = null;
         }
+
+        console.log("touchEndEvent");
 
         if (!this.isDragging) {
             this.mouseDownEvent(me);
@@ -3512,45 +3526,89 @@ papaya.viewer.Viewer.prototype.markerObject = function(startingIndex, endingInde
 
 
 papaya.viewer.Viewer.prototype.drawMarkers = function() {
+    var sliceArray = [this.mainImage, this.lowerImageTop, this.lowerImageBot];
+
     for (var i = 0; i < this.markingCoords.length; i++) {
         var marker = this.markingCoords[i];
-        if (this.mainImage.sliceDirection == marker.view && this.mainImage.currentSlice == marker.slice) {
-            var start = this.convertCoordinateToScreen(marker.start);
-            var end = this.convertCoordinateToScreen(marker.end);
-            /*console.log(marker.end);
-             console.log(start);*/
+        console.log(marker);
 
-            var ctx = this.canvas.getContext("2d");
-            //ctx.save();
-            ctx.beginPath();
-            ctx.lineWidth = "3";
-            ctx.strokeStyle = "red";
-            ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
-            ctx.stroke();
-            //ctx.restore();
+        for (var j = 0; j < sliceArray.length; j++) {
 
-            if (marker.textLabel.length > 0) {
-                ctx.font = "20px Georgia";
-                ctx.fillStyle = "red";
-
-                if (this.canvas.width > 1200) {
-                    ctx.font = "28px Georgia";
-                    ctx.fillText(marker.textLabel, end.x + 20, end.y + 12);
-                } else if (this.canvas.width > 2500) {
-                    ctx.font = "48px Georgia";
-                    ctx.fillText(marker.textLabel, end.x + 25, end.y + 16);
-                } else {
-                    ctx.fillText(marker.textLabel, end.x + 12, end.y + 8);
-                }
+            var lineThickness = 2;
+            if (j==0) {
+                lineThickness = 3;
             }
+            this.drawMarkersForSlice(marker, sliceArray[j], lineThickness);
         }
     }
 
     this.mainImage.repaint(this.mainImage.currentSlice, false, true);
-    //this.lowerImageBot.repaint(this.lowerImageBot.currentSlice, false, true);
-    //this.lowerImageTop.repaint(this.lowerImageTop.currentSlice, false, true);
+    this.lowerImageBot.repaint(this.lowerImageBot.currentSlice, false, true);
+    this.lowerImageTop.repaint(this.lowerImageTop.currentSlice, false, true);
 }
 
+papaya.viewer.Viewer.prototype.drawMarkersForSlice = function(marker, slice, lineThickness) {
+    var start = this.convertCoordinateToScreen(marker.start, slice);
+    var end = this.convertCoordinateToScreen(marker.end, slice);
+
+    var current = this.convertCoordinateToScreen(this.currentCoord, slice);
+    console.log(current);
+
+
+        var ctx = this.canvas.getContext("2d");
+        ctx.beginPath();
+        ctx.lineWidth = lineThickness;
+        ctx.strokeStyle = "red";
+/*        if (slice.sliceDirection == marker.view) {
+            ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
+            if (((current.x >= start.x && current.x <= end.x) || ((current.x <= start.x && current.x >= end.x))) && ((current.y >= start.y && current.y <= end.y) || (current.y <= start.y && current.y >= end.y))) {
+                console.log("overlap");
+                ctx.stroke();
+                this.drawLabel(marker);
+            }
+        } else {*/
+        console.log(start.x + ", " + start.y + ", " + (end.x - start.x) + ", " + (end.y - start.y));
+        var width = end.x - start.x;
+        var height = end.y - start.y;
+        var x = start.x;
+        var y = start.y;
+        if (width === 0) {
+            width = height / 2;
+            x = start.x - width;
+        }
+        if (height === 0) {
+            height = width / 2;
+            y = start.y + width;
+        }
+        ctx.rect(start.x, start.y, width, height);
+        console.log(x + ", " + y + ", " + width + ", " + height);
+
+        if (((current.x >= x && current.x <= end.x) || ((current.x <= x && current.x >= end.x))) && ((current.y >= y && current.y <= end.y) || (current.y <= y && current.y >= end.y))) {
+            console.log("overlap");
+            ctx.stroke();
+            this.drawLabel(marker);
+        }
+}
+
+papaya.viewer.Viewer.prototype.drawLabel = function(marker) {
+    if (marker.textLabel.length > 0) {
+        var end = this.convertCoordinateToScreen(marker.end);
+        var ctx = this.canvas.getContext("2d");
+
+        ctx.font = "20px Georgia";
+        ctx.fillStyle = "red";
+
+        if (this.canvas.width > 1200) {
+            ctx.font = "28px Georgia";
+            ctx.fillText(marker.textLabel, end.x + 20, end.y + 12);
+        } else if (this.canvas.width > 2500) {
+            ctx.font = "48px Georgia";
+            ctx.fillText(marker.textLabel, end.x + 25, end.y + 16);
+        } else {
+            ctx.fillText(marker.textLabel, end.x + 12, end.y + 8);
+        }
+    }
+}
 
 
 papaya.viewer.Viewer.prototype.clearMarkers = function() {

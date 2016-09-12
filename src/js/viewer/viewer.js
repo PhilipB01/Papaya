@@ -3530,7 +3530,7 @@ papaya.viewer.Viewer.prototype.drawMarkers = function() {
 
     for (var i = 0; i < this.markingCoords.length; i++) {
         var marker = this.markingCoords[i];
-        console.log(marker);
+        //console.log(marker);
 
         for (var j = 0; j < sliceArray.length; j++) {
 
@@ -3552,21 +3552,11 @@ papaya.viewer.Viewer.prototype.drawMarkersForSlice = function(marker, slice, lin
     var end = this.convertCoordinateToScreen(marker.end, slice);
 
     var current = this.convertCoordinateToScreen(this.currentCoord, slice);
-    console.log(current);
-
-
+    //console.log(current);
         var ctx = this.canvas.getContext("2d");
         ctx.beginPath();
         ctx.lineWidth = lineThickness;
         ctx.strokeStyle = "red";
-/*        if (slice.sliceDirection == marker.view) {
-            ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
-            if (((current.x >= start.x && current.x <= end.x) || ((current.x <= start.x && current.x >= end.x))) && ((current.y >= start.y && current.y <= end.y) || (current.y <= start.y && current.y >= end.y))) {
-                console.log("overlap");
-                ctx.stroke();
-                this.drawLabel(marker);
-            }
-        } else {*/
         console.log(start.x + ", " + start.y + ", " + (end.x - start.x) + ", " + (end.y - start.y));
         var width = end.x - start.x;
         var height = end.y - start.y;
@@ -3574,16 +3564,17 @@ papaya.viewer.Viewer.prototype.drawMarkersForSlice = function(marker, slice, lin
         var y = start.y;
         if (width === 0) {
             width = height / 2;
-            x = start.x - width;
+            x = start.x;
         }
         if (height === 0) {
             height = width / 2;
-            y = start.y + width;
+            y = start.y - height/2;
         }
-        ctx.rect(start.x, start.y, width, height);
+        ctx.rect(x, y, width, height);
         console.log(x + ", " + y + ", " + width + ", " + height);
 
-        if (((current.x >= x && current.x <= end.x) || ((current.x <= x && current.x >= end.x))) && ((current.y >= y && current.y <= end.y) || (current.y <= y && current.y >= end.y))) {
+        if ((((current.x >= x && current.x <= end.x) || (current.x <= x && current.x >= end.x)) && ((current.y >= y && current.y <= end.y) || (current.y <= y && current.y >= end.y)))
+            || (marker.slice === this.mainImage.currentSlice && marker.view === this.mainImage.sliceDirection)) {
             console.log("overlap");
             ctx.stroke();
             this.drawLabel(marker);
@@ -3602,7 +3593,7 @@ papaya.viewer.Viewer.prototype.drawLabel = function(marker) {
             ctx.font = "28px Georgia";
             ctx.fillText(marker.textLabel, end.x + 20, end.y + 12);
         } else if (this.canvas.width > 2500) {
-            ctx.font = "48px Georgia";
+            ctx.font = "72px Georgia";
             ctx.fillText(marker.textLabel, end.x + 25, end.y + 16);
         } else {
             ctx.fillText(marker.textLabel, end.x + 12, end.y + 8);

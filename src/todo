@@ -2,10 +2,10 @@ Add color tables (try in sample project with base papaya build to test worldSpac
 
 lib modification required:
 
-x fix touch marker coord bug
 alter canvas size for zoom and mri
-ROI appear on all orthogonal planes
-marker table should use coordinates from rectangle not crosshair
+x fix touch marker coord bug
+x ROI appear on all orthogonal planes
+x marker table should use coordinates from rectangle not crosshair
 
 x Improve marking with labels
 x Allow view switch between sagittal axial coronal directly
